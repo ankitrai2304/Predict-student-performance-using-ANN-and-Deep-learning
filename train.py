@@ -13,6 +13,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
+import joblib # <-- ADD THIS IMPORT
 
 # ----------------------------------------------------------------------------
 # Step 1 & 2: Dataset Preparation and Preprocessing
@@ -21,7 +22,7 @@ print("--- Step 1 & 2: Loading and Preprocessing Data ---")
 
 # Load the dataset, specifying the semicolon delimiter
 try:
-    df = pd.read_csv('/workspaces/Predict-student-performance-using-ANN-and-Deep-learning/student-mat.csv', sep=';')
+    df = pd.read_csv('student-mat.csv', sep=';')
     print("Dataset loaded successfully.")
 
     # Define the target variable 'passed'
@@ -52,18 +53,19 @@ try:
             ('cat', categorical_transformer, categorical_features)
         ])
 
-    # Apply the preprocessing
+    # Apply the preprocessing - .toarray() is removed here as it's not needed.
     X_train_processed = preprocessor.fit_transform(X_train)
     X_val_processed = preprocessor.transform(X_val)
     X_test_processed = preprocessor.transform(X_test)
 
     # Convert to PyTorch Tensors
-    X_train_tensor = torch.tensor(X_train_processed, dtype=torch.float32)
+    X_train_tensor = torch.tensor(X_train_processed, dtype=torch.float32) # .toarray() needed here for sparse matrix
     y_train_tensor = torch.tensor(y_train.values, dtype=torch.float32).view(-1, 1)
     X_val_tensor = torch.tensor(X_val_processed, dtype=torch.float32)
     y_val_tensor = torch.tensor(y_val.values, dtype=torch.float32).view(-1, 1)
     X_test_tensor = torch.tensor(X_test_processed, dtype=torch.float32)
     y_test_tensor = torch.tensor(y_test.values, dtype=torch.float32).view(-1, 1)
+
 
     # Create TensorDatasets and DataLoaders
     batch_size = 32
@@ -233,7 +235,23 @@ try:
     plt.title('Confusion Matrix for Test Set')
     plt.show()
 
+    # ----------------------------------------------------------------------------
+    # Step 6: Save the Model and Preprocessor for Deployment
+    # ----------------------------------------------------------------------------
+    print("\n--- Step 6: Saving Model and Preprocessor ---")
+    
+    # Save the trained PyTorch model's state dictionary
+    torch.save(model.state_dict(), 'student_model.pth')
+    print("Trained model saved to 'student_model.pth'")
+
+    # Save the scikit-learn preprocessor object
+    joblib.dump(preprocessor, 'preprocessor.joblib')
+    print("Data preprocessor saved to 'preprocessor.joblib'")
+
+
 except FileNotFoundError:
     print("Error: 'student-mat.csv' not found. Please ensure the file is uploaded correctly.")
 except Exception as e:
     print(f"An error occurred: {e}")
+
+
