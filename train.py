@@ -21,7 +21,7 @@ print("--- Step 1 & 2: Loading and Preprocessing Data ---")
 
 # Load the dataset, specifying the semicolon delimiter
 try:
-    df = pd.read_csv('student-mat.csv', sep=';')
+    df = pd.read_csv('/workspaces/Predict-student-performance-using-ANN-and-Deep-learning/student-mat.csv', sep=';')
     print("Dataset loaded successfully.")
 
     # Define the target variable 'passed'
@@ -53,9 +53,9 @@ try:
         ])
 
     # Apply the preprocessing
-    X_train_processed = preprocessor.fit_transform(X_train).toarray()
-    X_val_processed = preprocessor.transform(X_val).toarray()
-    X_test_processed = preprocessor.transform(X_test).toarray()
+    X_train_processed = preprocessor.fit_transform(X_train)
+    X_val_processed = preprocessor.transform(X_val)
+    X_test_processed = preprocessor.transform(X_test)
 
     # Convert to PyTorch Tensors
     X_train_tensor = torch.tensor(X_train_processed, dtype=torch.float32)
